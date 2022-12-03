@@ -4,9 +4,12 @@
   "description": "ToDo app backend",
   "main": "index.js",
   "dependencies": {
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mongoose": "^6.7.2"
+    "mongoose": "^6.7.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {},
   "scripts": {
