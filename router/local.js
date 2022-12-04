@@ -13,5 +13,6 @@ router.post(
   [verifySignUp.checkDuplicateUsernameOrEmail],
   UserController.createUser
 );
+router.post("/login", UserController.signIn);
 
 module.exports = router;

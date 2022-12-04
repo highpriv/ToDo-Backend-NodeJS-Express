@@ -3,6 +3,7 @@ const express = require("express");
 const public = require("./router/local");
 
 require("dotenv").config();
+const cors = require("cors");
 
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -14,7 +15,7 @@ var corsOptions = {
 };
 
 const app = express();
-
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

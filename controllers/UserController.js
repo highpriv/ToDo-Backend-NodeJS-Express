@@ -1,6 +1,7 @@
 const Users = require("../models/Users");
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
+const config = require("../config/authentication");
 
 const controller = {
   async getUsers(req, res, next) {
@@ -47,6 +48,41 @@ const controller = {
     } catch (error) {
       throw error;
     }
+  },
+
+  async signIn(req, res) {
+    Users.findOne({
+      username: req.body.username,
+    }).exec((err, user) => {
+      if (err) {
+        res.status(500).send({ message: err });
+        return;
+      }
+
+      if (!user) {
+        return res.status(404).send({ message: "User Not found." });
+      }
+
+      var checkPassword = bcrypt.compareSync(req.body.password, user.password);
+
+      if (!checkPassword) {
+        return res.status(401).send({
+          accessToken: null,
+          message: "Wrong password",
+        });
+      }
+
+      var token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: 86400,
+      });
+
+      res.status(200).send({
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        accessToken: token,
+      });
+    });
   },
 };
 module.exports = controller;
