@@ -51,22 +51,27 @@ const controller = {
   },
 
   async signIn(req, res) {
+    const { username } = req.body;
+
     Users.findOne({
-      username: req.body.username,
+      $or: [{ email: username }, { username: username }],
     }).exec((err, user) => {
       if (err) {
-        res.status(500).send({ message: err });
+        res.status(500).send({ status: 500, message: err });
         return;
       }
 
       if (!user) {
-        return res.status(404).send({ message: "User Not found." });
+        return res
+          .status(404)
+          .send({ status: 404, message: "User Not found." });
       }
 
       var checkPassword = bcrypt.compareSync(req.body.password, user.password);
 
       if (!checkPassword) {
         return res.status(401).send({
+          status: 401,
           accessToken: null,
           message: "Wrong password",
         });
@@ -77,6 +82,7 @@ const controller = {
       });
 
       res.status(200).send({
+        status: 200,
         id: user._id,
         username: user.username,
         email: user.email,
