@@ -32,17 +32,17 @@ const controller = {
 
       user.save((err, user) => {
         if (err) {
-          res.status(500).send({ message: err });
+          res.status(500).send({ message: err, status: 500 });
           return;
         }
 
         user.save((err) => {
           if (err) {
-            res.status(500).send({ message: err });
+            res.status(500).send({ message: err, status: 500 });
             return;
           }
 
-          res.send({ message: "Registiration successful!" });
+          res.send({ message: "Registiration successful!", status: 200 });
         });
       });
     } catch (error) {
