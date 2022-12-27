@@ -1,4 +1,5 @@
 const UserController = require("../controllers/UserController");
+const TaskController = require("../controllers/TaskController");
 const { verifySignUp } = require("../middlewares");
 
 // router local.js - Router Public Module
@@ -14,5 +15,6 @@ router.post(
   UserController.createUser
 );
 router.post("/login", UserController.signIn);
+router.post("/create-tasks", TaskController.createTask);
 
 module.exports = router;
