@@ -4,20 +4,26 @@ var bcrypt = require("bcryptjs");
 const config = require("../config/authentication");
 
 const controller = {
-  async getUsers(req, res, next) {
-    let result = await Users.find({});
+  async getUser(req, res, next) {
+    try {
+      const cookie = req.cookies["jwt"];
 
-    if (result && result.length > 0) {
-      return res.json({
-        result: "success",
-        message: "User list recieved.",
-        users: result,
-      });
-    } else {
-      return res.json({
-        result: "error",
-        message: "Couldnt find users!",
-        errCode: "USERS_NOT_FOUND",
+      const checkCookie = jwt.verify(cookie, config.secret);
+
+      if (!checkCookie) {
+        return res.status(401).send({
+          message: "auth error when verify",
+        });
+      }
+
+      const user = await Users.findOne({ _id: checkCookie._id });
+
+      const { password, ...data } = await user.toJSON();
+
+      res.send(data);
+    } catch (err) {
+      res.status(401).send({
+        message: "An error occured!",
       });
     }
   },
@@ -30,20 +36,13 @@ const controller = {
         password: bcrypt.hashSync(req.body.password, 8),
       });
 
-      user.save((err, user) => {
+      user.save((err) => {
         if (err) {
           res.status(500).send({ message: err, status: 500 });
           return;
         }
 
-        user.save((err) => {
-          if (err) {
-            res.status(500).send({ message: err, status: 500 });
-            return;
-          }
-
-          res.send({ message: "Registiration successful!", status: 200 });
-        });
+        res.send({ message: "Registiration successful!", status: 200 });
       });
     } catch (error) {
       throw error;
@@ -53,41 +52,35 @@ const controller = {
   async signIn(req, res) {
     const { username } = req.body;
 
-    Users.findOne({
+    const user = await Users.findOne({
       $or: [{ email: username }, { username: username }],
-    }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ status: 500, message: err });
-        return;
-      }
+    });
 
-      if (!user) {
-        return res
-          .status(404)
-          .send({ status: 404, message: "User Not found." });
-      }
+    if (!user) {
+      return res.status(404).send({ status: 404, message: "User Not found." });
+    }
 
-      var checkPassword = bcrypt.compareSync(req.body.password, user.password);
+    var checkPassword = bcrypt.compareSync(req.body.password, user.password);
 
-      if (!checkPassword) {
-        return res.status(401).send({
-          status: 401,
-          accessToken: null,
-          message: "Wrong password",
-        });
-      }
-
-      var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400,
+    if (!checkPassword) {
+      return res.status(401).send({
+        status: 401,
+        accessToken: null,
+        message: "Wrong password",
       });
+    }
 
-      res.status(200).send({
-        status: 200,
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        accessToken: token,
-      });
+    var token = jwt.sign({ _id: user._id }, config.secret, {
+      expiresIn: 86400,
+    });
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    res.send({
+      message: "Login Successful",
     });
   },
 };
