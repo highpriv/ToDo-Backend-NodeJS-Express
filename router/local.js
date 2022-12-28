@@ -16,6 +16,7 @@ router.post(
   UserController.createUser
 );
 router.post("/login", UserController.signIn);
+router.post("/update-profile", UserController.updateProfile);
 router.post("/check-token", jwtAuth.checkToken);
 router.get("/user", UserController.getUser);
 router.post("/logout", (req, res) => {

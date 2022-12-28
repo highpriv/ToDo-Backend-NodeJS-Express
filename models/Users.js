@@ -9,6 +9,9 @@ const usersSchema = new mongoose.Schema({
   email: String,
   name: String,
   password: String,
+  name: String,
+  surname: String,
+  profile_photo: String,
 });
 
 module.exports = mongoose.model("Users", usersSchema, "users");

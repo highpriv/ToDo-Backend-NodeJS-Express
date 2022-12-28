@@ -83,5 +83,58 @@ const controller = {
       message: "Login Successful",
     });
   },
+
+  async updateProfile(req, res) {
+    const { name, surname, username, email, current_pw, password } = req.body;
+
+    const cookie = req.cookies["jwt"];
+
+    const checkCookie = jwt.verify(cookie, config.secret);
+
+    if (!checkCookie) {
+      return res.status(401).send({
+        message: "auth error when verify",
+      });
+    }
+
+    const user = await Users.findOne({ _id: checkCookie._id });
+
+    const userWithMail = await Users.findOne({ email: email });
+    const userWithUserName = await Users.findOne({ username: username });
+
+    if (!user) {
+      return res.status(404).send({ status: 404, message: "User Not found." });
+    }
+
+    if (user.username !== username && userWithUserName)
+      return res
+        .status(401)
+        .send({ status: 401, message: "Username already taken." });
+
+    if (user.email !== email && userWithMail)
+      return res
+        .status(401)
+        .send({ status: 401, message: "Email already in use." });
+
+    user.name = name;
+    user.surname = surname;
+    user.email = email;
+    user.username = username;
+
+    if (current_pw) {
+      const checkPw = bcrypt.compareSync(current_pw, user.password);
+      if (checkPw) user.password = bcrypt.hashSync(password, 8);
+      else
+        return res
+          .status(401)
+          .send({ status: 401, message: "Current password is wrong." });
+    }
+
+    user.save();
+
+    res.send({
+      message: "Update Successful",
+    });
+  },
 };
 module.exports = controller;
