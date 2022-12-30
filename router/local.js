@@ -21,7 +21,7 @@ router.post("/update-profile", UserController.updateProfile);
 router.post("/check-token", jwtAuth.checkToken);
 router.post("/create-tasks", TasksController.createTasks);
 router.put("/edit-tasks/:id", TasksController.editTask);
-router.get("/get-tasks/:status", TasksController.getTasks);
+router.get("/get-tasks/:status/:page", TasksController.getTasks);
 
 router.get("/user", UserController.getUser);
 router.post("/logout", (req, res) => {

@@ -10,6 +10,9 @@ const controller = {
     try {
       const cookie = req.cookies["jwt"];
 
+      let perPage = 9;
+      let page = Math.max(0, req.params.page);
+
       const checkCookie = jwt.verify(cookie, config.secret);
 
       if (!checkCookie) {
@@ -20,10 +23,17 @@ const controller = {
 
       const user = await Users.findOne({ _id: checkCookie._id });
 
-      const tasks = await Tasks.find({
-        userID: user._id,
-        status: req.params.status,
-      });
+      const tasks = await Tasks.find(
+        {
+          userID: user._id,
+          status: req.params.status,
+        },
+        {},
+        {
+          skip: req.query.page !== "0" ? perPage * (page - 1) : 0,
+          limit: req.query.page !== "0" ? perPage : 10000,
+        }
+      ).sort({ _id: -1 });
 
       res.send(tasks);
     } catch (err) {

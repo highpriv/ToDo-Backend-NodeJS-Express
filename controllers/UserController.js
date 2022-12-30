@@ -1,4 +1,6 @@
 const Users = require("../models/Users");
+const Tasks = require("../models/Tasks");
+
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const config = require("../config/authentication");
@@ -18,7 +20,15 @@ const controller = {
 
       const user = await Users.findOne({ _id: checkCookie._id });
 
+      const userTask = await Tasks.find({
+        userID: user._id,
+      });
+
+      const taskCount = userTask.length;
+
       const { password, ...data } = await user.toJSON();
+
+      data.taskCount = taskCount;
 
       res.send(data);
     } catch (err) {
