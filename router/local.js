@@ -1,4 +1,5 @@
 const UserController = require("../controllers/UserController");
+const TasksController = require("../controllers/TasksController");
 const { verifySignUp, jwtAuth } = require("../middlewares");
 var jwt = require("jsonwebtoken");
 const config = require("../config/authentication");
@@ -18,6 +19,10 @@ router.post(
 router.post("/login", UserController.signIn);
 router.post("/update-profile", UserController.updateProfile);
 router.post("/check-token", jwtAuth.checkToken);
+router.post("/create-tasks", TasksController.createTasks);
+router.put("/edit-tasks/:id", TasksController.editTask);
+router.get("/get-tasks/:status", TasksController.getTasks);
+
 router.get("/user", UserController.getUser);
 router.post("/logout", (req, res) => {
   res.cookie("jwt", "", { maxAge: 0 });

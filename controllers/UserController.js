@@ -36,6 +36,15 @@ const controller = {
         password: bcrypt.hashSync(req.body.password, 8),
       });
 
+      const haveUser = await Users.findOne({
+        $or: [{ email: req.body.email }, { username: req.body.username }],
+      });
+
+      if (haveUser)
+        res
+          .status(404)
+          .send({ message: "Email or username taken", status: 500 });
+
       user.save((err) => {
         if (err) {
           res.status(500).send({ message: err, status: 500 });
@@ -63,8 +72,8 @@ const controller = {
     var checkPassword = bcrypt.compareSync(req.body.password, user.password);
 
     if (!checkPassword) {
-      return res.status(401).send({
-        status: 401,
+      return res.json({
+        status: 404,
         accessToken: null,
         message: "Wrong password",
       });
@@ -79,7 +88,8 @@ const controller = {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
-    res.send({
+    res.status(200).send({
+      status: 200,
       message: "Login Successful",
     });
   },

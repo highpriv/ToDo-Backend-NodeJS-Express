@@ -3,28 +3,19 @@ const mongoose = require("mongoose");
 
 AutoID = mongoose.Types.ObjectId;
 
-const tasksSchema = new mongoose.Schema({
+const usersSchema = new mongoose.Schema({
   id: AutoID,
   userID: {
     type: ObjectID,
-    required: true,
     default: null,
-    ref: "Users",
   },
-  content: {
-    type: String
-  },
+  title: String,
+  description: String,
+  created: Date,
   status: {
     type: String,
-    require: true,
-    enum: [
-      "todo",
-      "ongoing",
-    "done"
-    ],
-    default: "todo",
+    enum: ["todo", "ongoing", "completed"],
   },
-  created: Date,
 });
 
-module.exports = mongoose.model("Tasks", tasksSchema, "tasks");
+module.exports = mongoose.model("Tasks", usersSchema, "tasks");
