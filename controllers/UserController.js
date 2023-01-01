@@ -24,8 +24,15 @@ const controller = {
         userID: user._id,
       });
 
-      const taskCount = userTask.length;
+      const statusTypes = ["todo", "ongoing", "completed"];
 
+      let taskCount = [];
+
+      statusTypes.map((type) => {
+        taskCount.push({
+          [type]: userTask.filter((task) => task.status == type).length,
+        });
+      });
       const { password, ...data } = await user.toJSON();
 
       data.taskCount = taskCount;
@@ -40,28 +47,33 @@ const controller = {
 
   async createUser(req, res, next) {
     try {
-      const user = new Users({
-        username: req.body.username,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 8),
-      });
+      let { password, re_password, email, username, termsOfUse, permissions } =
+        req.body;
+
+      if (password !== re_password || !termsOfUse)
+        return res.status(404).send({ message: "Please check your fields." });
 
       const haveUser = await Users.findOne({
-        $or: [{ email: req.body.email }, { username: req.body.username }],
+        $or: [{ email }, { username }],
       });
 
       if (haveUser)
-        res
+        return res
           .status(404)
           .send({ message: "Email or username taken", status: 500 });
 
+      let user = new Users({
+        username,
+        email,
+        password: bcrypt.hashSync(password, 8),
+      });
+
       user.save((err) => {
         if (err) {
-          res.status(500).send({ message: err, status: 500 });
-          return;
+          return res.status(500).send({ message: err, status: 500 });
         }
 
-        res.send({ message: "Registiration successful!", status: 200 });
+        return res.send({ message: "Registiration successful!", status: 200 });
       });
     } catch (error) {
       throw error;
